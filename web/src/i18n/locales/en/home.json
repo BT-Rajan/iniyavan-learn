@@ -1,0 +1,37 @@
+{
+  "greeting": "{part, select, morning {Good morning} afternoon {Good afternoon} other {Good evening}}, {name}",
+  "subtitle": "Here's what to do next.",
+  "studiedToday": "You've studied today. Nice.",
+  "keepStreak": "Study today to keep your {n, plural, one {# day} other {# day}} streak.",
+  "notPlaced": "You aren't placed in a program yet, so school courses won't show. Ask your admin — your own courses still work.",
+  "nextUp": "Next up",
+  "courseProgress": "Course progress",
+  "start": "Start",
+  "continue": "Continue",
+  "seeCourse": "See the course",
+  "allDone": "You're all caught up",
+  "allDoneBody": "Every topic is done. Review or try a quiz to earn more stars.",
+  "browse": "Browse courses",
+  "noCourses": "No courses yet",
+  "noCoursesBody": "Turn your own notes into a course — PDF, Word or pasted text.",
+  "makeCourse": "Make a course",
+  "yourWeek": "Your week",
+  "levelProgress": "{into} of {span} points to the next level",
+  "toNext": "{n, plural, one {# point} other {# points}} to the next level",
+  "completedWeek": "{n, plural, =0 {No topics finished this week yet.} one {# topic finished this week.} other {# topics finished this week.}}",
+  "reviews": {
+    "title": "Ready to review",
+    "why": "A quick review now helps you remember for longer.",
+    "count": "{n, plural, one {# topic} other {# topics}} due",
+    "start": "Review"
+  },
+  "deadlines": "Deadlines",
+  "dueOn": "Due {date}",
+  "teaching": {
+    "title": "Your teaching",
+    "all": "All courses",
+    "none": "No courses are assigned to you yet.",
+    "report": "Report",
+    "tests": "Tests"
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "generic": {
+    "failed": "That didn't work. Please try again.",
+    "server": "Something went wrong on our side. Please try again in a moment.",
+    "not_found": "This isn't here any more, or you can't open it.",
+    "title_required": "Give it a title."
+  },
+  "network": { "offline": "You seem to be offline. Check your connection and try again." },
+  "http": {
+    "not_found": "This isn't here.",
+    "method_not_allowed": "That action isn't available.",
+    "too_large": "That is too large to send.",
+    "error": "That didn't work. Please try again."
+  },
+  "validation": {
+    "failed": "Some fields need a look.",
+    "invalid": "This doesn't look right.",
+    "missing": "Fill this in.",
+    "string_too_short": "This is too short.",
+    "string_too_long": "This is too long.",
+    "value_error": "This doesn't look right.",
+    "int_parsing": "Enter a whole number.",
+    "greater_than_equal": "This number is too small.",
+    "less_than_equal": "This number is too large.",
+    "literal_error": "Pick one of the choices.",
+    "too_long": "There are too many items.",
+    "json_invalid": "That didn't arrive correctly. Please try again."
+  },
+  "auth": {
+    "required": "Please sign in.",
+    "csrf": "Your session needs a refresh. Reload the page and try again.",
+    "forbidden": "You don't have access to this.",
+    "wrong_credentials": "That email and password don't match.",
+    "wrong_password": "Your current password isn't right.",
+    "locked": "Too many tries. Wait {minutes, plural, one {# minute} other {# minutes}} and try again.",
+    "disabled": "This account is turned off. Ask your institution for help.",
+    "password_change_required": "Choose a new password first.",
+    "reset_invalid": "This reset link has expired or was already used. Ask for a new one.",
+    "registration_closed": "Sign-up isn't open here.",
+    "domain_not_allowed": "Sign-up needs an email address from your institution.",
+    "email_taken": "There is already an account with this email. Try signing in.",
+    "code_wrong": "That code isn't right. {left, plural, one {# try left} other {# tries left}}.",
+    "code_expired": "That code has expired. Start again to get a new one.",
+    "too_many_codes": "Too many codes asked for. Wait a while and try again.",
+    "locale_unknown": "That language isn't available."
+  },
+  "user": {
+    "cannot_change_self": "You can't change your own role or turn off your own account.",
+    "email_invalid": "Enter a valid email address.",
+    "email_taken": "Someone already uses this email.",
+    "not_a_student": "This person isn't a student.",
+    "password_short": "Use at least {min} characters.",
+    "role_invalid": "Pick a role."
+  },
+  "program": {
+    "name_required": "Give the program a name.",
+    "name_taken": "There is already a program with this name.",
+    "pattern_invalid": "Pick how the program is divided.",
+    "terms_out_of_range": "Between 1 and {max}.",
+    "term_out_of_range": "Pick a term between 1 and {max}.",
+    "terms_do_not_fit": "This program has terms beyond {max}. Remove them first."
+  },
+  "term": { "number_taken": "Term {number} already exists." },
+  "course": {
+    "not_editable": "Only the course owner or an admin can change this.",
+    "no_classmates": "You need to be placed in a program to share with classmates.",
+    "not_catalog": "This works for school courses only.",
+    "owner_must_be_faculty": "The owner must be a faculty member.",
+    "personal_limit": "You have reached {max} personal courses. Archive one to make room.",
+    "visibility_invalid": "Pick who can see it."
+  },
+  "archive": { "parent_archived": "Restore the program, term or course this belongs to first." },
+  "order": { "mismatch": "The list changed while you were working. It has been refreshed — try again." },
+  "topic": {
+    "format_invalid": "Unknown content format.",
+    "move_within_course": "Topics can only move within their course."
+  },
+  "upload": {
+    "not_an_image": "That file isn't an image we can show (PNG, JPEG, GIF or WebP).",
+    "too_large": "Files can be up to {max_mb} MB.",
+    "use_uploaded_image": "Upload the image here instead of linking to it."
+  },
+  "quiz": {
+    "empty": "This quiz has no questions yet.",
+    "answer_every_question": "Answer every question before you submit.",
+    "answer_invalid": "That answer isn't one of the choices.",
+    "answers_after_submit": "Answers are shown after you submit.",
+    "not_editable": "This quiz can't be changed here.",
+    "title_required": "Give the test a title.",
+    "too_many_questions": "A test can have up to {max} questions."
+  },
+  "question": {
+    "text_required": "Question {number} needs its text.",
+    "options_invalid": "Question {number} needs 2 to 6 different choices.",
+    "correct_required": "Question {number} needs a correct answer.",
+    "topic_outside": "Question {number} points to a topic outside this course."
+  },
+  "practice": { "no_material": "This topic has no text to make questions from yet." },
+  "review": {
+    "nothing_due": "Nothing is due for review. Nice work!",
+    "no_questions": "There are no questions to review yet. Take a quick check on a topic first."
+  },
+  "bank": {
+    "duplicate": "This question is already in the bank.",
+    "not_yours": "Only the person who saved this question can change it."
+  },
+  "import": {
+    "columns_missing": "The file needs these columns: {columns}.",
+    "empty": "The file has no rows.",
+    "too_large": "Files can be up to {max_mb} MB.",
+    "too_many_rows": "Up to {max} rows at a time.",
+    "duplicate_row": "This row repeats an earlier one.",
+    "program_unknown": "There is no program called “{program}”.",
+    "answer_empty": "Choice {letter} is empty but later choices are filled.",
+    "one_correct_only": "Mark exactly one correct answer.",
+    "correct_invalid": "The correct answer must be a letter from A to {last}.",
+    "topic_unknown": "No topic called “{topic}” — the question will have no topic.",
+    "topic_ambiguous": "More than one topic is called “{topic}” — the question will have no topic."
+  },
+  "studio": {
+    "no_material": "Add some material first.",
+    "no_text_found": "No text found in {name}.",
+    "too_much_material": "That's more material than one course can hold. Split it into two courses.",
+    "file_type": "Use a PDF, a Word file (.docx) or a text file.",
+    "old_word": "Old Word files (.doc) can't be read. Save it as .docx and try again.",
+    "word_unreadable": "This Word file couldn't be read.",
+    "pdf_unreadable": "This PDF couldn't be read. It may be locked or damaged.",
+    "pdf_no_text": "This PDF is scanned pages with no text in it. Paste the text instead.",
+    "no_outline": "Split the material into topics first.",
+    "outline_empty": "Keep at least one topic.",
+    "outline_invalid": "The outline doesn't look right. Split it again.",
+    "outline_order": "Topics must follow the material's order without overlapping.",
+    "range_invalid": "Those paragraphs aren't in the material.",
+    "source_not_found": "That file isn't in the material any more.",
+    "would_replace": "This course already has topics. Choose to replace them."
+  },
+  "ai": {
+    "unavailable": "The AI helper isn't set up here yet.",
+    "needs_own_key": "Add your AI key in your profile to use the AI helper.",
+    "limit_reached": "You've used today's {limit} AI requests. They refresh within a day.",
+    "provider_error": "The AI helper isn't answering right now. Try again in a moment.",
+    "key_refused": "Your AI key was refused. Check it in your profile.",
+    "bad_answer": "The AI helper gave an answer we couldn't use. Try again.",
+    "key_not_needed": "Your institution provides the AI helper — you don't need a key."
+  },
+  "settings": {
+    "limit_out_of_range": "Use a number from {min} to {max}.",
+    "unknown_prompt": "Unknown prompt."
+  },
+  "report": { "catalog_only": "Reports are for school courses." }
+}

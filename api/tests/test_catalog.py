@@ -156,3 +156,14 @@ def test_personal_courses_are_private_unless_shared_with_classmates(admin):
     assert [c["title"] for c in mate.get("/api/browse").json()["personal"]] == ["My notes"] and code_of(other.get(f"/api/courses/{cid}")) == "course.not_found"
     assert code_of(mate.patch(f"/api/courses/{cid}", json={"title": "Mine"})) == "course.not_editable"
     assert code_of(other.patch("/api/courses/999", json={"title": "x"})) == "course.not_found"
+
+
+def test_autosaved_edits_make_one_version_per_sitting(admin):
+    p, t, chem, adv, fac, stu = setup_school(admin)
+    u = admin.post(f"/api/courses/{chem['id']}/units", json={"title": "Water"}).json()
+    tid = admin.post(f"/api/units/{u['id']}/topics", json={"title": "Hardness", "content": "a"}).json()["id"]
+    for text in ("ab", "abc", "abcd"):
+        admin.patch(f"/api/topics/{tid}", json={"content": text})
+    vs = admin.get(f"/api/topics/{tid}/versions").json()
+    assert [v["note"] for v in vs] == ["edited", "created"]
+    assert admin.get(f"/api/topics/{tid}/versions/{vs[0]['id']}").json()["content"] == "abcd"

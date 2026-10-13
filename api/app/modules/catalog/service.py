@@ -1,6 +1,7 @@
 """Programs, terms, courses, units and topics (R-PROG-*, R-CRS-*)."""
 from __future__ import annotations
 
+import datetime as dt
 import re
 from collections import defaultdict
 
@@ -332,11 +333,20 @@ def topic_state(t: Topic) -> dict:
     return {k: getattr(t, k) or "" for k in VFIELDS}
 
 
+VERSION_MERGE_MINUTES = 10
+
+
 def record_version(db: Session, t: Topic, before: dict | None, user_id: int, note: str) -> None:
     now = topic_state(t)
     if before is not None and before == now:
         return
     db.flush()
+    last = db.scalar(select(TopicVersion).where(TopicVersion.topic_id == t.id).order_by(TopicVersion.id.desc()).limit(1))
+    if note == "edited" and last and last.note == "edited" and last.saved_by == user_id and last.saved_at > utcnow() - dt.timedelta(minutes=VERSION_MERGE_MINUTES):
+        for k, v in now.items():  # autosave: one person's run of edits is one version, not one per keystroke pause
+            setattr(last, k, v)
+        last.saved_at = utcnow()
+        return
     db.add(TopicVersion(topic_id=t.id, saved_by=user_id, note=note[:200], **now))
     db.flush()
     old = list(db.scalars(select(TopicVersion.id).where(TopicVersion.topic_id == t.id).order_by(TopicVersion.id.desc()).offset(VERSIONS_KEPT)))

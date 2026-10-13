@@ -1,0 +1,35 @@
+{
+  "name": "iniyavan-learn-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "i18n:check": "node scripts/i18n-check.mjs"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.90.21",
+    "i18next": "25.5.3",
+    "i18next-icu": "2.4.5",
+    "intl-messageformat": "10.7.18",
+    "react": "19.1.9",
+    "react-dom": "19.1.9",
+    "react-i18next": "15.7.4",
+    "react-markdown": "10.1.0",
+    "react-router-dom": "7.9.6",
+    "remark-gfm": "4.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.1",
+    "@types/react": "19.1.17",
+    "@types/react-dom": "19.1.11",
+    "@vitejs/plugin-react": "5.0.4",
+    "typescript": "5.9.3",
+    "vite": "7.1.12",
+    "vitest": "3.2.7"
+  }
+}
