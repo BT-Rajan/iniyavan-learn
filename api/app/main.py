@@ -15,9 +15,10 @@ from app.modules.assessment.router import router as assessment_router
 from app.modules.auth.router import router as auth_router
 from app.modules.catalog.router import router as catalog_router
 from app.modules.learning.router import router as learning_router
+from app.modules.studio.router import router as studio_router
 from app.modules.users.router import router as users_router
 
-ROUTERS = [auth_router, users_router, catalog_router, learning_router, assessment_router, ai_router]
+ROUTERS = [auth_router, users_router, catalog_router, learning_router, assessment_router, ai_router, studio_router]
 SAFE = {"GET", "HEAD", "OPTIONS"}
 
 
