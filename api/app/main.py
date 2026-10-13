@@ -10,12 +10,14 @@ from fastapi.staticfiles import StaticFiles
 from app import models  # noqa: F401  (registers every table)
 from app.core import errors
 from app.core.config import settings
+from app.modules.ai.router import router as ai_router
+from app.modules.assessment.router import router as assessment_router
 from app.modules.auth.router import router as auth_router
 from app.modules.catalog.router import router as catalog_router
 from app.modules.learning.router import router as learning_router
 from app.modules.users.router import router as users_router
 
-ROUTERS = [auth_router, users_router, catalog_router, learning_router]
+ROUTERS = [auth_router, users_router, catalog_router, learning_router, assessment_router, ai_router]
 SAFE = {"GET", "HEAD", "OPTIONS"}
 
 
