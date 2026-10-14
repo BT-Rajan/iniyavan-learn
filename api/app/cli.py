@@ -1,4 +1,9 @@
-"""Command line: `python -m app.cli create-admin EMAIL NAME` and `python -m app.cli demo` (sample school for trying the app)."""
+"""Command line:
+  python -m app.cli create-admin EMAIL NAME     first admin (asks for a password)
+  python -m app.cli reset-password EMAIL        new password for anyone, e.g. a locked-out admin (asks for it)
+  python -m app.cli list-admins                 who the admins are
+  python -m app.cli demo                        a sample school for trying the app
+"""
 from __future__ import annotations
 
 import getpass
@@ -17,15 +22,43 @@ DEMO_PASSWORD = "demo-pass-1"
 
 
 def create_admin(email: str, name: str, password: str | None = None) -> None:
-    password = password or os.getenv("ADMIN_PASSWORD") or getpass.getpass("Password (8+ characters): ")
-    if len(password) < 8:
-        sys.exit("The password needs at least 8 characters.")
+    password = password or _ask_password()
     with SessionLocal() as db:
         if db.scalar(select(User).where(User.email == email.lower())):
             sys.exit(f"{email} already has an account.")
         db.add(User(email=email.lower(), name=name, role="admin", password_hash=hash_password(password), session_key=new_session_key()))
         db.commit()
     print(f"Admin {email} created.")
+
+
+def _ask_password() -> str:
+    password = os.getenv("ADMIN_PASSWORD") or getpass.getpass("New password (8+ characters, typing is hidden): ")
+    if len(password) < 8:
+        sys.exit("The password needs at least 8 characters.")
+    if not os.getenv("ADMIN_PASSWORD") and getpass.getpass("Type it again: ") != password:
+        sys.exit("The two passwords don't match. Nothing was changed.")
+    return password
+
+
+def reset_password(email: str) -> None:
+    with SessionLocal() as db:
+        user = db.scalar(select(User).where(User.email == email.lower()))
+        if not user:
+            sys.exit(f"No account with the email {email}. See the admins with: python -m app.cli list-admins")
+        user.password_hash = hash_password(_ask_password())
+        user.must_change_password, user.active = False, True
+        user.session_key = new_session_key()  # signs out every old session
+        db.commit()
+    print(f"New password set for {email}. Sign in with it now.")
+
+
+def list_admins() -> None:
+    with SessionLocal() as db:
+        admins = list(db.scalars(select(User).where(User.role == "admin").order_by(User.id)))
+    for u in admins:
+        print(f"{u.email}\t{u.name}\t{'active' if u.active else 'turned off'}")
+    if not admins:
+        print("No admins yet. Create one: python -m app.cli create-admin EMAIL NAME")
 
 
 def _user(db, email, name, role, **kw) -> User:
@@ -93,6 +126,10 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     if args[:1] == ["create-admin"] and len(args) >= 3:
         create_admin(args[1], " ".join(args[2:]))
+    elif args[:1] == ["reset-password"] and len(args) == 2:
+        reset_password(args[1])
+    elif args == ["list-admins"]:
+        list_admins()
     elif args == ["demo"]:
         demo()
     else:

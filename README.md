@@ -33,6 +33,7 @@ Open http://localhost:5173 and sign in as `admin@demo.school`, `teacher@demo.sch
 cp .env.example .env                # set SECRET_KEY at least
 docker compose up -d --build
 docker compose exec app python -m app.cli create-admin you@school.org "Your Name"
+# forgot the password?  docker compose exec app python -m app.cli reset-password you@school.org
 ```
 
 Data (SQLite database and uploads) lives in the `data` volume. Use PostgreSQL or MySQL by setting
