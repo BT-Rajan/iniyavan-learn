@@ -1,5 +1,7 @@
 {
-  "copy": { "failed": "Couldn’t copy. Select the text and copy it by hand." },
+  "copy": {
+    "failed": "Couldn’t copy. Select the text and copy it by hand."
+  },
   "credentials": {
     "name": "Name",
     "email": "Email",
@@ -16,7 +18,12 @@
     "filters": "Find people",
     "search": "Search by name or email",
     "roleFilter": "Show",
-    "roles": { "all": "Everyone", "student": "Students", "faculty": "Faculty", "admin": "Admins" },
+    "roles": {
+      "all": "Everyone",
+      "student": "Students",
+      "faculty": "Faculty",
+      "admin": "Admins"
+    },
     "programFilter": "Program",
     "anyProgram": "Any program",
     "termFilter": "Term",
@@ -26,7 +33,14 @@
     "empty": "Add people one by one, or import a whole class from a CSV file.",
     "clearFilters": "Clear filters",
     "selectAll": "Select everyone shown",
-    "cols": { "person": "Person", "role": "Role", "placement": "Program and term", "active": "Account", "lastSeen": "Last seen", "actions": "Actions" },
+    "cols": {
+      "person": "Person",
+      "role": "Role",
+      "placement": "Program and term",
+      "active": "Account",
+      "lastSeen": "Last seen",
+      "actions": "Actions"
+    },
     "showing": "Showing {shown} of {total}",
     "program": "Program",
     "term": "Term",
@@ -104,7 +118,11 @@
     "run": "{n, plural, =0 {Nothing to import} one {Import # person} other {Import # people}}",
     "done": "Imported: {created, plural, =0 {nobody new} one {# new person} other {# new people}}, {updated, plural, =0 {none updated} one {# updated} other {# updated}}."
   },
-  "patterns": { "semester": "Semesters", "year": "Years", "grade": "Grades" },
+  "patterns": {
+    "semester": "Semesters",
+    "year": "Years",
+    "grade": "Grades"
+  },
   "programs": {
     "title": "Programs",
     "sub": "How your institution is divided, and which term each student is in.",
@@ -130,7 +148,7 @@
     "restore": "Restore program",
     "archive": "Archive program",
     "delete": "Delete",
-    "deleteHint": "{courses, plural, =0 {No courses} one {# course is deleted with it} other {# courses are deleted with it}}; {students, plural, =0 {nobody is placed here.} one {# student loses their place.} other {# students lose their place.}}",
+    "deleteHint": "{courses, plural, =0 {No courses, so it can be deleted;} one {Has # course — archive it, or remove the course first;} other {Has # courses — archive it, or remove the courses first;}} {students, plural, =0 {nobody is placed here.} one {# student would lose their place.} other {# students would lose their place.}}",
     "deleteConfirm": "Delete {name} for good",
     "new": {
       "title": "New program",
@@ -140,6 +158,15 @@
       "termsHint": "{pattern, select, semester {Named Semester 1, Semester 2… Up to {max}.} year {Named Year 1, Year 2… Up to {max}.} other {Named Grade 1, Grade 2… Up to {max}.}}",
       "termsRange": "Use a number from 0 to {max}.",
       "create": "Create program"
+    },
+    "term": {
+      "none": "No courses in {name} yet.",
+      "newCourse": "New course in {name}…",
+      "teacher": "Teacher",
+      "noTeacher": "No teacher yet",
+      "create": "Add course",
+      "created": "Added",
+      "nameLabel": "Name of this term:"
     }
   },
   "rollover": {
@@ -318,8 +345,12 @@
         "update": "{who} changed a test",
         "questions": "{who} changed a test’s questions"
       },
-      "studio": { "apply": "{who} built a course from material" },
-      "settings": { "update": "{who} changed the settings" }
+      "studio": {
+        "apply": "{who} built a course from material"
+      },
+      "settings": {
+        "update": "{who} changed the settings"
+      }
     }
   }
 }

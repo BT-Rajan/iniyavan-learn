@@ -1,9 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 import { api } from "@/api/client";
-import type { Program, ProgramTerm } from "@/api/types";
+import type { Browse, CourseCard, Program, ProgramTerm } from "@/api/types";
 import { fmtList } from "@/i18n/format";
 import { ActionButton, Button, ConfirmButton, Field, InlineText, SaveStatus, Segmented, useAction, UndoBar, useUndo } from "@/ui/controls";
 import { Empty, LoadError, Notice, PageHead, PageLoading } from "@/ui/display";
@@ -144,9 +145,64 @@ function AddTerm({ p, onAdded }: { p: Program; onAdded: () => void }) {
   );
 }
 
+/** A term opens in place: its courses (each a link), a quick "new course" line, and renaming. */
+function TermCourses({ term, p, onCreated }: { term: ProgramTerm; p: Program; onCreated: () => void }) {
+  const { t } = useTranslation("admin");
+  const qc = useQueryClient();
+  const err = useErrorText();
+  const browse = useQuery({ queryKey: ["browse"], queryFn: () => api.get<Browse>("/api/browse") });
+  const faculty = useQuery({ queryKey: ["faculty"], queryFn: () => api.get<{ id: number; name: string }[]>("/api/users/faculty") });
+  const [title, setTitle] = useState("");
+  const [owner, setOwner] = useState("");
+  const courses = (browse.data?.terms ?? []).flatMap((g) => g.courses).filter((c) => c.kind === "catalog" && c.term_id === term.id);
+  const create = useAction(async () => {
+    await api.post<CourseCard>("/api/courses", { title: title.trim(), term_id: term.id, owner_id: owner ? Number(owner) : null });
+    setTitle("");
+    await qc.invalidateQueries({ queryKey: ["browse"] });
+    onCreated();
+  });
+  return (
+    <div className="stack tight fade-in" style={{ padding: "4px 16px 14px 54px" }}>
+      {browse.isPending ? <span className="small muted">{t("common:status.loading")}</span> : courses.length === 0 ? (
+        <span className="small muted">{t("programs.term.none", { name: term.name })}</span>
+      ) : (
+        <ul className="stack tight" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+          {courses.map((c) => (
+            <li key={c.id} className="row tight">
+              <Icon name="book" style={{ color: "var(--accent)" }} />
+              <Link to={`/courses/${c.id}`}>{c.title}</Link>
+              <span className="tiny muted">{c.owner || t("programs.term.noTeacher")}</span>
+              {c.archived && <span className="pill">{t("common:status.archived")}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+      {!term.archived && !p.archived && (
+        <form className="row tight" onSubmit={(e: FormEvent) => { e.preventDefault(); if (title.trim()) void create.run(); }}>
+          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} placeholder={t("programs.term.newCourse", { name: term.name })}
+                 aria-label={t("programs.term.newCourse", { name: term.name })} style={{ flex: "1 1 220px", inlineSize: "auto" }} />
+          <select value={owner} onChange={(e) => setOwner(e.target.value)} aria-label={t("programs.term.teacher")} style={{ inlineSize: "auto" }}>
+            <option value="">{t("programs.term.noTeacher")}</option>
+            {(faculty.data ?? []).map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+          </select>
+          <Button type="submit" variant="primary" icon="plus" busy={create.busy} disabled={!title.trim()}>{t("programs.term.create")}</Button>
+          {create.state === "done" && <span className="status ok fade-in"><Icon name="check" /> {t("programs.term.created")}</span>}
+          {create.state === "error" && <span className="status err">{err(create.error)}</span>}
+        </form>
+      )}
+      <div className="row tight small muted">
+        <span>{t("programs.term.nameLabel")}</span>
+        <InlineText value={term.name} label={t("programs.renameTerm", { n: term.number })} maxLength={150} disabled={p.archived}
+                    onSave={async (name) => { const r = await api.patch<{ name: string }>(`/api/terms/${term.id}`, { name }); qc.setQueryData<Program[]>(["programs"], (d) => d?.map((x) => (x.id === p.id ? { ...x, terms: x.terms.map((y) => (y.id === term.id ? { ...y, name: r.name } : y)) } : x))); }} />
+      </div>
+    </div>
+  );
+}
+
 function TermRow({ term, p, undo }: { term: ProgramTerm; p: Program; undo: ReturnType<typeof useUndo> }) {
   const { t } = useTranslation("admin");
   const set = useSetPrograms();
+  const [open, setOpen] = useState(false);
   const setTerm = (change: Partial<ProgramTerm>) => set.edit(p.id, (x) => ({ ...x, terms: x.terms.map((y) => (y.id === term.id ? { ...y, ...change } : y)) }));
   const archive = async (archived: boolean) => {
     await api.put(`/api/terms/${term.id}/archive`, { archived });
@@ -159,19 +215,25 @@ function TermRow({ term, p, undo }: { term: ProgramTerm; p: Program; undo: Retur
     }
   };
   return (
-    <div className="topic-row" style={{ opacity: term.archived ? 0.6 : 1 }}>
-      <span className="state" aria-hidden>{term.number}</span>
-      <span className="grow row tight">
-        <InlineText value={term.name} label={t("programs.renameTerm", { n: term.number })} maxLength={150} disabled={p.archived}
-                    onSave={async (name) => { const r = await api.patch<{ name: string }>(`/api/terms/${term.id}`, { name }); setTerm({ name: r.name }); }} />
-        {term.archived && <span className="pill warn">{t("common:status.archived")}</span>}
-      </span>
-      <span className="small muted nowrap">{t("programs.courses", { n: term.courses })}</span>
-      {term.archived ? (
-        <ActionButton size="small" variant="ghost" icon="undo" disabled={p.archived} action={() => archive(false)}>{t("common:actions.restore")}</ActionButton>
-      ) : (
-        <ActionButton size="small" variant="ghost" icon="archive" disabled={p.archived} title={t("programs.archiveTerm", { name: term.name })} action={() => archive(true)}>{null}</ActionButton>
-      )}
+    <div style={{ borderBlockEnd: "1px solid var(--line)", opacity: term.archived ? 0.6 : 1 }}>
+      <div className="topic-row" style={{ borderBlockEnd: 0 }}>
+        <button type="button" className="grow row tight" aria-expanded={open} onClick={() => setOpen(!open)}
+                style={{ background: "none", border: 0, padding: 0, font: "inherit", color: "inherit", cursor: "pointer", textAlign: "start" }}>
+          <span className="state" aria-hidden>{term.number}</span>
+          <span className="title">{term.name}</span>
+          {term.archived && <span className="pill warn">{t("common:status.archived")}</span>}
+          <Icon name={open ? "chevronDown" : "chevronRight"} style={{ color: "var(--faint)" }} />
+        </button>
+        <button type="button" className="btn ghost small" onClick={() => setOpen(!open)} aria-expanded={open}>
+          {t("programs.courses", { n: term.courses })}
+        </button>
+        {term.archived ? (
+          <ActionButton size="small" variant="ghost" icon="undo" disabled={p.archived} action={() => archive(false)}>{t("common:actions.restore")}</ActionButton>
+        ) : (
+          <ActionButton size="small" variant="ghost" icon="archive" disabled={p.archived} title={t("programs.archiveTerm", { name: term.name })} action={() => archive(true)}>{null}</ActionButton>
+        )}
+      </div>
+      {open && <TermCourses term={term} p={p} onCreated={() => setTerm({ courses: term.courses + 1 })} />}
     </div>
   );
 }
