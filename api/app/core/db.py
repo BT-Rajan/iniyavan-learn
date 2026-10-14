@@ -14,7 +14,7 @@ NAMING = {"ix": "ix_%(column_0_label)s", "uq": "uq_%(table_name)s_%(column_0_nam
 
 
 def utcnow() -> dt.datetime:
-    return dt.datetime.now(dt.UTC).replace(tzinfo=None)  # stored as naive UTC everywhere
+    return dt.datetime.now(dt.timezone.utc).replace(tzinfo=None)  # stored as naive UTC everywhere
 
 
 class Base(DeclarativeBase):

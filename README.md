@@ -17,7 +17,7 @@ English and Arabic ship today — Arabic mirrors the whole interface right-to-le
 
 ## Run it
 
-**Try it with demo data** (Python 3.12 and Node 22):
+**Try it with demo data** (Python 3.10+ and Node 20.19+ or 22+):
 
 ```sh
 scripts/dev.sh                      # first run creates .env, installs, migrates; then API :8000 + web :5173

@@ -82,7 +82,7 @@ class TopicIn(BaseModel):
     @field_validator("due_at")
     @classmethod
     def utc(cls, v: dt.datetime | None) -> dt.datetime | None:
-        return v.astimezone(dt.UTC).replace(tzinfo=None) if v and v.tzinfo else v
+        return v.astimezone(dt.timezone.utc).replace(tzinfo=None) if v and v.tzinfo else v
 
 
 class TopicPatch(TopicIn):
