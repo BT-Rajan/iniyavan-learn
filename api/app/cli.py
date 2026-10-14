@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import getpass
+import os
 import sys
 
 from sqlalchemy import select
@@ -16,7 +17,7 @@ DEMO_PASSWORD = "demo-pass-1"
 
 
 def create_admin(email: str, name: str, password: str | None = None) -> None:
-    password = password or getpass.getpass("Password (8+ characters): ")
+    password = password or os.getenv("ADMIN_PASSWORD") or getpass.getpass("Password (8+ characters): ")
     if len(password) < 8:
         sys.exit("The password needs at least 8 characters.")
     with SessionLocal() as db:
