@@ -19,6 +19,13 @@ dependencies = [
   "psycopg[binary]>=3.1",
 ]
 
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.5"]
 

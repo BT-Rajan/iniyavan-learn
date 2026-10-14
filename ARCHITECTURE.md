@@ -27,17 +27,20 @@ api/                      Python 3.12, FastAPI, SQLAlchemy 2, Alembic
       search/             topic search across everything a person may see
       reports/            course and student reports for staff
       admin/              settings, branding, audit log
-    main.py               app factory: routers, error handlers, static web build
-  alembic/                migrations (the schema is never changed by hand)
+    main.py               app factory: routers, error handlers, CSRF guard, static web build
+    cli.py                create the first admin; load demo data
+  migrations/             Alembic (the schema is never changed by hand)
   tests/                  pytest; the AI is a fake in tests
-web/                      React 18, TypeScript, Vite, TanStack Query, i18next (ICU)
+web/                      React 19, TypeScript, Vite, TanStack Query, i18next (ICU)
   src/
-    app/                  router, layout, providers
-    i18n/                 setup and locales/en.json (every string the user sees)
-    lib/                  API client (typed errors), formatting (Intl), hooks
-    ui/                   primitives: Button with pending/done states, inline-edit Text, Field,
-                          Status, Undo, Skeleton, Tabs, Stars, Markdown
+    api/                  the API client (typed error codes) and response types
+    app/                  router, shell (navigation, search), session, theme
+    i18n/                 setup, Intl formatting, locales/<lang>/<namespace>.json
+    ui/                   primitives: buttons with busy/done states, inline-edit text, autosave,
+                          inline Undo and confirm, fields, progress, content rendering
     features/             one folder per area, matching the API modules
+  scripts/i18n-check.mjs  every message is valid ICU and every key used exists
+  CONVENTIONS.md          how screens are built
 ```
 
 Each API module has the same four parts: `models.py` (tables), `schemas.py` (request and
@@ -74,7 +77,7 @@ services; services call other services, never other routers.
 
 ## Internationalisation
 
-- All user-facing text is in `web/src/i18n/locales/<lang>.json`, ICU message format (plurals,
+- All user-facing text is in `web/src/i18n/locales/<lang>/<namespace>.json`, ICU message format (plurals,
   selects). English ships first; adding a language is adding a file.
 - Dates, numbers and relative times use `Intl` with the user's locale.
 - Layout uses logical CSS properties (`margin-inline-start`, `inset-inline-end`) and the `dir`
