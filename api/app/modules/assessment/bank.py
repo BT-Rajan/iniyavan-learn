@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_or_404
 from app.core.errors import AppError
+from app.modules.catalog import content
 from app.modules.users.models import User
 
 from .models import BankQuestion, Question, Quiz
@@ -42,7 +43,17 @@ def search(db: Session, user: User, q: str, tag: str, mine: bool, limit: int, of
     return {"total": total, "items": [row(x, user, owners) for x in items], "tags": tags}
 
 
+def _checked(options: list[dict], correct: int) -> list[dict]:
+    opts = [{"text": (o.get("text") or "").strip(), "image": content.check_image_url(o.get("image") or "")} for o in options]
+    if not 2 <= len(opts) <= 6 or not all(o["text"] or o["image"] for o in opts):
+        raise AppError("question.options_invalid", 400, number=1)
+    if not isinstance(correct, int) or not 0 <= correct < len(opts):
+        raise AppError("question.correct_required", 400, number=1)
+    return opts
+
+
 def add(db: Session, user: User, text: str, options: list[dict], correct: int, explanation: str, tags: str) -> bool:
+    options = _checked(options, correct)
     fp = fingerprint(text, options, correct)
     if db.scalar(select(BankQuestion.id).where(BankQuestion.fingerprint == fp)):
         return False
@@ -59,7 +70,11 @@ def edit(db: Session, user: User, bid: int, data: dict) -> BankQuestion:
             setattr(x, k, data[k])
     if data.get("tags") is not None:
         x.tags = clean_tags(data["tags"])
-    x.fingerprint = fingerprint(x.text, x.options, x.correct)
+    x.options = _checked(x.options, x.correct)
+    fp = fingerprint(x.text, x.options, x.correct)
+    if db.scalar(select(BankQuestion.id).where(BankQuestion.fingerprint == fp, BankQuestion.id != x.id)):
+        raise AppError("bank.duplicate", 409)
+    x.fingerprint = fp
     db.commit()
     return x
 
@@ -87,6 +102,7 @@ def from_test(db: Session, user: User, q: Quiz, tags: str) -> dict:
 
 
 def into_test(db: Session, q: Quiz, ids: list[int], limit: int) -> int:
+    ids = list(dict.fromkeys(ids))
     have = db.scalar(select(func.count(Question.id)).where(Question.quiz_id == q.id)) or 0
     rows = {x.id: x for x in db.scalars(select(BankQuestion).where(BankQuestion.id.in_(ids or [0])))}
     if len(rows) != len(set(ids)):
@@ -96,6 +112,7 @@ def into_test(db: Session, q: Quiz, ids: list[int], limit: int) -> int:
     for i, bid in enumerate(dict.fromkeys(ids)):
         x = rows[bid]
         x.uses += 1
-        db.add(Question(quiz_id=q.id, position=have + i, text=x.text, options=x.options, correct=x.correct, explanation=x.explanation))  # a copy
+        options = [{"text": o.get("text", ""), "image": content.check_image_url(o.get("image") or "")} for o in x.options]
+        db.add(Question(quiz_id=q.id, position=have + i, text=x.text, options=options, correct=x.correct, explanation=x.explanation))  # a copy
     db.commit()
     return have + len(ids)

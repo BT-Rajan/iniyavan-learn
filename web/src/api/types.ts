@@ -56,7 +56,7 @@ export interface Quiz {
   unit_id: number | null; topic_id: number | null; pass_percent: number; reveal: boolean; published: boolean; can_edit: boolean;
   questions: QuizQuestion[]; attempts: number; best: number | null; latest_attempt: number | null;
 }
-export interface TestRow { id: number; title: string; unit_id: number | null; pass_percent: number; published: boolean; reveal: boolean; questions: number; best: number | null }
+export interface TestRow { id: number; title: string; unit_id: number | null; pass_percent: number; published: boolean; reveal: boolean; questions: number; best: number | null; latest_attempt: number | null; students_taken: number }
 
 export type AreaStatus = "strong" | "getting_there" | "needs_study";
 export interface Area { topic_id: number | null; title: string; unit: string; general: boolean; correct: number; total: number; percent: number; status: AreaStatus }
@@ -75,7 +75,7 @@ export interface Check { ok: boolean; correct: number; explanation: string }
 
 export interface Stats { average: number | null; median: number | null; highest: number | null; lowest: number | null }
 export interface TestResults {
-  id: number; title: string; pass_percent: number; published: boolean;
+  id: number; title: string; pass_percent: number; published: boolean; course_id: number;
   summary: Stats & { students: number; took: number; not_taken: number; attempts: number; passed: number; pass_rate: number | null; spread: number[] };
   students: { user_id: number; name: string; email: string; attempts: number; best: number; latest: number; latest_attempt: number; passed: boolean; last_at: string; strong: string[]; needs_study: string[] }[];
   not_taken: { user_id: number; name: string }[];
@@ -107,7 +107,7 @@ export interface UserRow {
   self_registered: boolean; must_change_password: boolean; last_seen_at: string | null;
 }
 export interface Settings {
-  app_name: string; logo: string; self_registration: string; allowed_domains: string; ai_model: string; ai_daily_limit: string; ai_key_set: boolean;
+  app_name: string; logo: string; self_registration: string; allowed_domains: string; ai_model: string; ai_daily_limit: string; ai_key_set: boolean; defaults?: { ai_model: string; ai_daily_limit: string };
   prompts: Record<string, { value: string; default: string }>;
 }
 export interface AuditItem { id: number; at: string; user_id: number | null; user: string | null; action: string; target: string; detail: Record<string, unknown> }

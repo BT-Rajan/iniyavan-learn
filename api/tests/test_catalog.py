@@ -167,3 +167,11 @@ def test_autosaved_edits_make_one_version_per_sitting(admin):
     vs = admin.get(f"/api/topics/{tid}/versions").json()
     assert [v["note"] for v in vs] == ["edited", "created"]
     assert admin.get(f"/api/topics/{tid}/versions/{vs[0]['id']}").json()["content"] == "abcd"
+
+
+def test_programs_with_courses_are_archived_not_deleted(admin):
+    p, t, chem, adv, fac, stu = setup_school(admin)
+    r = admin.delete(f"/api/programs/{p['id']}")
+    assert (r.status_code, r.json()["error"]["code"], r.json()["error"]["params"]) == (409, "program.has_courses", {"count": 2})
+    assert code_of(admin.delete(f"/api/terms/{t[1]}")) == "term.has_courses"
+    assert admin.delete(f"/api/terms/{t[4]}").status_code == 204

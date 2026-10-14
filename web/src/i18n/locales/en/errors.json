@@ -5,7 +5,9 @@
     "not_found": "This isn't here any more, or you can't open it.",
     "title_required": "Give it a title."
   },
-  "network": { "offline": "You seem to be offline. Check your connection and try again." },
+  "network": {
+    "offline": "You seem to be offline. Check your connection and try again."
+  },
   "http": {
     "not_found": "This isn't here.",
     "method_not_allowed": "That action isn't available.",
@@ -50,7 +52,8 @@
     "email_taken": "Someone already uses this email.",
     "not_a_student": "This person isn't a student.",
     "password_short": "Use at least {min} characters.",
-    "role_invalid": "Pick a role."
+    "role_invalid": "Pick a role.",
+    "only_students_placed": "Only students can be placed in a program."
   },
   "program": {
     "name_required": "Give the program a name.",
@@ -58,9 +61,13 @@
     "pattern_invalid": "Pick how the program is divided.",
     "terms_out_of_range": "Between 1 and {max}.",
     "term_out_of_range": "Pick a term between 1 and {max}.",
-    "terms_do_not_fit": "This program has terms beyond {max}. Remove them first."
+    "terms_do_not_fit": "This program has terms beyond {max}. Remove them first.",
+    "has_courses": "This program still has {count, plural, one {# course} other {# courses}}. Archive the program instead, or remove its courses first."
   },
-  "term": { "number_taken": "Term {number} already exists." },
+  "term": {
+    "number_taken": "Term {number} already exists.",
+    "has_courses": "This term still has {count, plural, one {# course} other {# courses}}. Archive it instead, or move its courses first."
+  },
   "course": {
     "not_editable": "Only the course owner or an admin can change this.",
     "no_classmates": "You need to be placed in a program to share with classmates.",
@@ -69,8 +76,12 @@
     "personal_limit": "You have reached {max} personal courses. Archive one to make room.",
     "visibility_invalid": "Pick who can see it."
   },
-  "archive": { "parent_archived": "Restore the program, term or course this belongs to first." },
-  "order": { "mismatch": "The list changed while you were working. It has been refreshed — try again." },
+  "archive": {
+    "parent_archived": "Restore the program, term or course this belongs to first."
+  },
+  "order": {
+    "mismatch": "The list changed while you were working. It has been refreshed — try again."
+  },
   "topic": {
     "format_invalid": "Unknown content format.",
     "move_within_course": "Topics can only move within their course."
@@ -95,7 +106,9 @@
     "correct_required": "Question {number} needs a correct answer.",
     "topic_outside": "Question {number} points to a topic outside this course."
   },
-  "practice": { "no_material": "This topic has no text to make questions from yet." },
+  "practice": {
+    "no_material": "This topic has no text to make questions from yet."
+  },
   "review": {
     "nothing_due": "Nothing is due for review. Nice work!",
     "no_questions": "There are no questions to review yet. Take a quick check on a topic first."
@@ -147,5 +160,7 @@
     "limit_out_of_range": "Use a number from {min} to {max}.",
     "unknown_prompt": "Unknown prompt."
   },
-  "report": { "catalog_only": "Reports are for school courses." }
+  "report": {
+    "catalog_only": "Reports are for school courses."
+  }
 }

@@ -4,7 +4,7 @@ from __future__ import annotations
 import random
 from collections import defaultdict
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.db import get_or_404, utcnow
@@ -77,6 +77,12 @@ def update_test(db: Session, user: User, q: Quiz, data: dict) -> Quiz:
     for k in ("title", "pass_percent", "reveal", "published"):
         if k in data and data[k] is not None:
             setattr(q, k, data[k].strip()[:200] if k == "title" else data[k])
+    if "unit_id" in data:  # null = the whole course
+        if data["unit_id"] is not None:
+            unit = db.get(Unit, data["unit_id"])
+            if not unit or unit.course_id != q.course_id:
+                raise AppError("unit.not_found", 404)
+        q.unit_id = data["unit_id"]
     if not q.title:
         raise AppError("quiz.title_required")
     audit(db, user.id, "test.update", f"quiz:{q.id}")
@@ -105,18 +111,31 @@ def clean_question(db: Session, q: Quiz, x: dict, n: int) -> dict:
             "topic_id": topic_id, "area": (x.get("area") or "").strip()[:150]}
 
 
-def replace_questions(db: Session, user: User, q: Quiz, items: list[dict]) -> int:
+def replace_questions(db: Session, user: User, q: Quiz, items: list[dict]) -> list[int]:
+    """The test's questions become `items`, in order. Items with the id of one of its questions update that question in place,
+    so attempts stay linked to it; the others are added; questions left out are removed. Returns the ids in order."""
     if q.kind != "test":
         raise AppError("quiz.not_editable", 403)
     if len(items) > max_questions(q):
         raise AppError("quiz.too_many_questions", 400, max=max_questions(q))
     rows = [clean_question(db, q, x, n) for n, x in enumerate(items, 1)]
-    db.execute(delete(Question).where(Question.quiz_id == q.id))  # past attempts keep their scores
-    for pos, v in enumerate(rows):
-        db.add(Question(quiz_id=q.id, position=pos, **v))
+    existing = {x.id: x for x in questions_of(db, q)}
+    kept: list[Question] = []
+    for pos, (x, v) in enumerate(zip(items, rows, strict=True)):
+        row = existing.pop(x.get("id"), None) if x.get("id") is not None else None
+        if row is None:
+            row = Question(quiz_id=q.id)
+            db.add(row)
+        for k, val in v.items():
+            setattr(row, k, val)
+        row.position = pos
+        kept.append(row)
+    for gone in existing.values():
+        db.delete(gone)
+    db.flush()
     audit(db, user.id, "test.questions", f"quiz:{q.id}", count=len(rows))
     db.commit()
-    return len(rows)
+    return [r.id for r in kept]
 
 
 def questions_of(db: Session, q: Quiz) -> list[Question]:
@@ -126,10 +145,16 @@ def questions_of(db: Session, q: Quiz) -> list[Question]:
 def course_tests(db: Session, user: User, course: Course) -> list[dict]:
     edit = policy.can_edit(user, course)
     tests = db.scalars(select(Quiz).where(Quiz.course_id == course.id, Quiz.kind == "test").order_by(Quiz.unit_id.is_not(None), Quiz.id))
-    counts = dict(db.execute(select(Question.quiz_id, func.count(Question.id)).group_by(Question.quiz_id)).all())
-    best = dict(db.execute(select(Attempt.quiz_id, func.max(Attempt.percent)).where(Attempt.user_id == user.id).group_by(Attempt.quiz_id)).all())
+    tests = list(tests)
+    ids = [q.id for q in tests] or [0]
+    counts = dict(db.execute(select(Question.quiz_id, func.count(Question.id)).where(Question.quiz_id.in_(ids)).group_by(Question.quiz_id)).all())
+    mine = db.execute(select(Attempt.quiz_id, func.max(Attempt.percent), func.max(Attempt.id)).where(Attempt.user_id == user.id, Attempt.quiz_id.in_(ids))
+                      .group_by(Attempt.quiz_id)).all()
+    best, latest = {a: b for a, b, _ in mine}, {a: c for a, _, c in mine}
+    takers = dict(db.execute(select(Attempt.quiz_id, func.count(func.distinct(Attempt.user_id))).where(Attempt.quiz_id.in_(ids)).group_by(Attempt.quiz_id)).all()) if edit else {}
     return [{"id": q.id, "title": q.title, "unit_id": q.unit_id, "pass_percent": q.pass_percent, "published": q.published, "reveal": q.reveal,
-             "questions": counts.get(q.id, 0), "best": best.get(q.id)} for q in tests if edit or (q.published and counts.get(q.id))]
+             "questions": counts.get(q.id, 0), "best": best.get(q.id), "latest_attempt": latest.get(q.id), "students_taken": takers.get(q.id, 0)}
+            for q in tests if edit or (q.published and counts.get(q.id))]
 
 
 # ---------- the player ----------

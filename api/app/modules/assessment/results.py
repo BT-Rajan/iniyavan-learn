@@ -102,8 +102,9 @@ def test_results(db: Session, q: Quiz, course: Course, as_csv: bool = False):
             g["total"] += a["total"]
             g["students"] += 1
             g[a["status"]] += 1
-    areas = sorted([{**g, "percent": round(100 * g["correct"] / g["total"])} for g in class_areas.values()], key=lambda g: g["percent"])
-    return {"id": q.id, "title": q.title, "pass_percent": q.pass_percent, "published": q.published,
+    areas = sorted([{**g, "percent": (pc := round(100 * g["correct"] / g["total"])), "status": service.status_of(pc), "general": not g.get("title")}
+                    for g in class_areas.values()], key=lambda g: g["percent"])
+    return {"id": q.id, "title": q.title, "pass_percent": q.pass_percent, "published": q.published, "course_id": q.course_id,
             "summary": {"students": len({u.id for u in audience} | set(by)), "took": len(by), "not_taken": len(not_taken), "attempts": sum(len(L) for L in by.values()),
                         "passed": sum(r["passed"] for r in students), "pass_rate": round(100 * sum(r["passed"] for r in students) / len(students)) if students else None,
                         **stats(best), "spread": spread},

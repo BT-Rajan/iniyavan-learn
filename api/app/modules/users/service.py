@@ -79,6 +79,8 @@ def update(db: Session, actor: User, user_id: int, patch: dict) -> User:
         user.name = patch["name"].strip()
     if patch.get("role"):
         user.role = patch["role"]
+        if user.role != "student":  # placement belongs to students only
+            user.program_id, user.term_no = None, None
     if "active" in patch and patch["active"] is not None and patch["active"] != user.active:
         user.active = patch["active"]
         if not user.active:
@@ -145,7 +147,9 @@ def import_csv(db: Session, actor: User, text: str, dry_run: bool) -> dict:
     errors, credentials, created, updated, seen = [], [], 0, 0, set()
     for n, raw in enumerate(rows, start=2):
         r = {(k or "").strip().lower(): (v or "").strip() for k, v in raw.items()}
-        email, role = r.get("email", "").lower(), (r.get("role") or "student").lower()
+        email = r.get("email", "").lower()
+        # An empty role leaves an existing person's role alone (a missing column must not demote staff).
+        role = (r.get("role") or (existing[email].role if email in existing else "student")).lower()
         try:
             if "@" not in email or "." not in email.split("@")[-1]:
                 raise AppError("user.email_invalid")
@@ -171,11 +175,13 @@ def import_csv(db: Session, actor: User, text: str, dry_run: bool) -> dict:
         if user:
             if r.get("name"):
                 user.name = r["name"]
-            if role and user.id != actor.id:
+            if r.get("role") and user.id != actor.id:
                 user.role = role
-            if pid:
+                if role != "student":
+                    user.program_id, user.term_no = None, None
+            if pid and user.role == "student":
                 user.program_id = pid
-            if term:
+            if term and user.role == "student":
                 user.term_no = term
             updated += 1
         else:

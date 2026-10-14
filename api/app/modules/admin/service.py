@@ -40,6 +40,8 @@ def settings_view(db: Session) -> dict:
     from app.modules.ai.service import PROMPTS
     out = {k: get(db, k) for k in DEFAULTS if k not in SECRET}
     out["ai_key_set"] = bool(get(db, "ai_key"))
+    from app.core.config import settings
+    out["defaults"] = {"ai_model": settings.ai_model, "ai_daily_limit": str(settings.ai_daily_limit)}  # what an empty field means
     out["prompts"] = {k: {"value": get(db, f"prompt_{k}"), "default": v} for k, v in PROMPTS.items()}
     return out
 

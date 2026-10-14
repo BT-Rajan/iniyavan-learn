@@ -116,3 +116,12 @@ def test_students_cannot_reach_admin_routes():
     add_user("s@x.com")
     s = Api().login("s@x.com")
     assert code_of(s.get("/api/users")) == "auth.forbidden" and code_of(s.post("/api/programs", json={"name": "X"})) == "auth.forbidden"
+
+
+def test_import_without_roles_keeps_staff_roles(admin):
+    from tests.conftest import add_user as _add
+    _add("prof@x.com", "faculty")
+    r = admin.post("/api/users/import", json={"csv": "name,email\nProf,prof@x.com\nNew,new@x.com\n", "dry_run": False}).json()
+    assert (r["created"], r["updated"]) == (1, 1)
+    users = {u["email"]: u["role"] for u in admin.get("/api/users").json()["items"]}
+    assert users["prof@x.com"] == "faculty" and users["new@x.com"] == "student"

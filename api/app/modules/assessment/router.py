@@ -57,7 +57,8 @@ def update_test(quiz_id: int, body: TestPatch, user: User = Depends(ready_user),
 @router.put("/tests/{quiz_id}/questions")
 def put_questions(quiz_id: int, body: QuestionsIn, user: User = Depends(ready_user), db: Session = Depends(get_db)):
     q, _ = _editable_test(db, user, quiz_id)
-    return {"count": service.replace_questions(db, user, q, [x.model_dump() for x in body.questions])}
+    ids = service.replace_questions(db, user, q, [x.model_dump() for x in body.questions])
+    return {"count": len(ids), "ids": ids}
 
 
 @router.post("/courses/{course_id}/tests/parse-csv")

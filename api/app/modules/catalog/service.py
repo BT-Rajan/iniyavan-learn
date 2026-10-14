@@ -475,6 +475,11 @@ def set_archived(db: Session, actor: User, kind: str, row, on: bool) -> None:
 
 
 def remove(db: Session, actor: User, kind: str, row) -> None:
+    if kind in ("program", "term"):  # courses are real work: they must be moved, deleted or archived first
+        terms = [row.id] if kind == "term" else list(db.scalars(select(Term.id).where(Term.program_id == row.id)))
+        n = db.scalar(select(func.count(Course.id)).where(Course.term_id.in_(terms or [0]))) or 0
+        if n:
+            raise AppError(f"{kind}.has_courses", 409, count=n)
     db.delete(row)  # foreign keys cascade to everything under it
     audit(db, actor.id, f"{kind}.delete", f"{kind}:{row.id}")
     db.commit()

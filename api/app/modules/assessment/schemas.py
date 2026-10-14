@@ -15,6 +15,7 @@ class TestIn(BaseModel):
 
 class TestPatch(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
+    unit_id: int | None = None
     pass_percent: int | None = Field(default=None, ge=1, le=100)
     reveal: bool | None = None
     published: bool | None = None
@@ -26,6 +27,7 @@ class OptionIn(BaseModel):
 
 
 class QuestionIn(BaseModel):
+    id: int | None = None  # an existing question keeps its id, so past attempts stay linked to it
     text: str = Field(default="", max_length=5000)
     image: str = Field(default="", max_length=300)
     options: list[OptionIn] = Field(max_length=6)

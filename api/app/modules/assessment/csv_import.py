@@ -72,10 +72,10 @@ def parse(db: Session, course_id: int, unit_id: int | None, text: str, limit: in
         while opts and not any(opts[-1]):
             opts.pop()
         if not text_ and not (qimg or qname):
-            errors.append({"row": n, "code": "question.text_required", "params": {}})
+            errors.append({"row": n, "code": "question.text_required", "params": {"number": n - 1}})
             continue
         if len(opts) < 2:
-            errors.append({"row": n, "code": "question.options_invalid", "params": {}})
+            errors.append({"row": n, "code": "question.options_invalid", "params": {"number": n - 1}})
             continue
         gap = next((LETTERS[i].upper() for i, o in enumerate(opts) if not any(o)), None)
         if gap:

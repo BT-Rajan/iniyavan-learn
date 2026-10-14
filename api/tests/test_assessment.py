@@ -184,3 +184,23 @@ def test_question_bank(admin):
     assert code_of(stu.get("/api/bank")) == "auth.forbidden"
     fac.put(f"/api/tests/{q['id']}/questions", json={"questions": QS})
     assert fac.post(f"/api/tests/{q['id']}/to-bank", json={"tags": "chem"}).json() == {"added": 2, "skipped": 0}
+
+
+def test_editing_questions_keeps_past_attempts_linked(admin):
+    c, u, t1, t2, fac, stu, stu2 = school(admin)
+    q = fac.post(f"/api/courses/{c['id']}/tests", json={"title": "T", "published": True}).json()
+    ids = fac.put(f"/api/tests/{q['id']}/questions", json={"questions": QS}).json()["ids"]
+    a = stu.post(f"/api/quizzes/{q['id']}/attempts", json={"answers": [0, 0]}).json()
+    edited = [{**QS[1], "id": ids[1], "text": "Which unit?"}, {**QS[0], "id": ids[0]}, {"text": "New?", "options": [{"text": "a"}, {"text": "b"}], "correct": 1}]
+    new_ids = fac.put(f"/api/tests/{q['id']}/questions", json={"questions": edited}).json()["ids"]
+    assert new_ids[:2] == [ids[1], ids[0]] and new_ids[2] not in ids
+    detail = stu.get(f"/api/attempts/{a['attempt_id']}").json()
+    assert {x["text"] for x in detail["questions"]} >= {"Which ion?", "Which unit?"}
+    res = fac.get(f"/api/tests/{q['id']}/results").json()
+    assert res["course_id"] == c["id"] and all("status" in x for x in res["areas"])
+    row = next(x for x in fac.get(f"/api/courses/{c['id']}/tests").json() if x["id"] == q["id"])
+    assert (row["questions"], row["students_taken"]) == (3, 1)
+    mine = next(x for x in stu.get(f"/api/courses/{c['id']}/tests").json() if x["id"] == q["id"])
+    assert mine["latest_attempt"] == a["attempt_id"]
+    assert code_of(fac.patch(f"/api/tests/{q['id']}", json={"unit_id": 9999})) == "unit.not_found"
+    assert fac.patch(f"/api/tests/{q['id']}", json={"unit_id": u["id"]}).status_code == 200
