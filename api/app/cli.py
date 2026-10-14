@@ -32,11 +32,19 @@ def create_admin(email: str, name: str, password: str | None = None) -> None:
 
 
 def _ask_password() -> str:
-    password = os.getenv("ADMIN_PASSWORD") or getpass.getpass("New password (8+ characters, typing is hidden): ")
+    """At a terminal the person always types it (twice). ADMIN_PASSWORD is only for scripts with no terminal,
+    and is never taken silently: .env values become settings too, so an old line there must not decide a password."""
+    if sys.stdin.isatty():
+        password = getpass.getpass("New password (8+ characters, typing is hidden): ")
+        if len(password) >= 8 and getpass.getpass("Type it again: ") != password:
+            sys.exit("The two passwords don't match. Nothing was changed.")
+    else:
+        password = os.getenv("ADMIN_PASSWORD", "")
+        if not password:
+            sys.exit("Run this in a terminal to type the password (or set ADMIN_PASSWORD for a script).")
+        print("Using the password from ADMIN_PASSWORD.")
     if len(password) < 8:
         sys.exit("The password needs at least 8 characters.")
-    if not os.getenv("ADMIN_PASSWORD") and getpass.getpass("Type it again: ") != password:
-        sys.exit("The two passwords don't match. Nothing was changed.")
     return password
 
 
