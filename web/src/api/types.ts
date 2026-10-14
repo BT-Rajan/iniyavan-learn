@@ -96,6 +96,7 @@ export interface OutlineDraftUnit { title: string; topics: OutlineDraftTopic[] }
 export interface StudioState {
   course_id: number; title: string; kind: "catalog" | "personal"; status: "ready" | "setup"; sources: StudioSource[]; paragraphs: number;
   words: number; notes: string | null; outline: { units: OutlineDraftUnit[] } | null; sliced_by: "ai" | "headings" | null; ai: AiStatus;
+  left_out: { start: number; end: number; first: string; excerpt: string }[];
 }
 
 export interface SearchHit { topic_id: number; title: string; unit: string; course_id: number; course: string; snippet: string }

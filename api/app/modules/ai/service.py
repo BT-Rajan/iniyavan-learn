@@ -42,12 +42,15 @@ PROMPTS = {
                   "invent facts. Each question has 4 options (2 for true/false), exactly one correct, plausible wrong options, a one- or two-sentence explanation "
                   "that points to the material, and a 'concept': the 2-5 word name of the idea it tests. Write in the material's language. Reply with JSON only: "
                   '{"questions":[{"text":"...","options":["...","...","...","..."],"correct":0,"explanation":"...","concept":"..."}]}'),
-    "slice": ("You turn study material into a course. The material is a numbered list of paragraphs like [12] text. Group it into units and split each unit "
-              "into topics. Each topic is the smallest logical component that can be learnt on its own: one concept, rule, definition group, worked example or "
-              "story, usually 1 to 6 paragraphs. Keep the material's order. Topics cover the paragraphs in order without gaps or overlaps: give each topic the "
-              "number of its first paragraph. Give every unit and topic a short, plain title in the material's language and every topic a one-line summary "
-              "in simple words a 15-year-old understands. Follow the "
-              'author\'s instructions when given. Reply with JSON only: {"units":[{"title":"...","topics":[{"title":"...","summary":"...","start":1}]}]}'),
+    "slice": ("You turn study material into a course. The material is a numbered list of paragraphs like [12] text; Markdown # marks headings. "
+              "Only the learning material becomes topics. Leave out everything else: cover and title page, copyright and publishing details, "
+              "table of contents, preface, foreword, acknowledgements, dedication, about the author, lists of figures, index, bibliography and "
+              "references, advertisements — unless the author's instructions ask for them. Group the learning material into units (chapters) and split "
+              "each unit into topics. Each topic is the smallest logical component that can be learnt on its own: one concept, rule, definition group, "
+              "worked example or story, usually 1 to 6 paragraphs. Keep the material's order and never overlap topics. For each topic give the "
+              "numbers of its first and last paragraph (start, end); paragraphs you leave out are simply not covered. Give every unit and topic a "
+              "short, plain title in the material's language and every topic a one-line summary in simple words a 15-year-old understands. Follow "
+              'the author\'s instructions when given. Reply with JSON only: {"units":[{"title":"...","topics":[{"title":"...","summary":"...","start":12,"end":15}]}]}'),
     "search": (VOICE + "You are the search helper of a study app. The student searched for something the app's notes do not cover well. Answer as a clear, accurate "
                "tutor: a one-line definition, the core idea simply, one example, three recap bullets. Use Markdown. If it is not about studies, say briefly that "
                "you can only help with study topics."),

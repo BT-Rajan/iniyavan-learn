@@ -58,8 +58,12 @@ refer to these by their number (for example `R-PROG-3`).
   Markdown, pasted text). Up to 50 courses, 20 MB per file, 1.5 million characters per course.
 - **R-PER-2** The material is sliced into units and the smallest topics that make sense alone, by
   the AI (following the student's notes) or by the document's headings. The AI returns only
-  paragraph ranges and titles; topics keep the material's words. The outline always covers the
-  material in order without gaps or overlaps.
+  paragraph ranges and titles; topics keep the material's words. Topics follow the material's
+  order and never overlap. Only learning material becomes topics: cover, copyright, contents,
+  preface, acknowledgements, index, bibliography and the like are left out (by the AI and by
+  rules that work without it), and what was left out is shown so the author can add it back.
+- **R-PER-6** Importing keeps the material's formatting: headings, lists, bold and italic, and
+  tables. Running headers, footers and page numbers are dropped.
 - **R-PER-3** The outline can be previewed, renamed, merged, split and trimmed, and sliced again,
   before it becomes the course. Applying again replaces the topics (after asking), with their
   progress.

@@ -1,8 +1,16 @@
 {
   "crumb": "Courses",
   "sub": "Add your material, let it be split into small topics, adjust, and create the course.",
-  "title": { "new": "Build “{title}”", "rebuild": "Rebuild “{title}”" },
-  "steps": { "label": "Steps", "material": "Add material", "split": "Split into topics", "review": "Review and create" },
+  "title": {
+    "new": "Build “{title}”",
+    "rebuild": "Rebuild “{title}”"
+  },
+  "steps": {
+    "label": "Steps",
+    "material": "Add material",
+    "split": "Split into topics",
+    "review": "Review and create"
+  },
   "new": {
     "kicker": "Course from your notes",
     "title": "What are you studying?",
@@ -81,5 +89,10 @@
     "replaceTitle": "This course already has topics",
     "replaceBody": "Creating replaces them, including progress on them. Your material stays.",
     "replace": "Replace topics"
+  },
+  "leftOut": {
+    "title": "Left out of the course ({n, plural, one {# paragraph} other {# paragraphs}})",
+    "hint": "These parts don't look like learning material — cover, copyright, contents, preface, index and the like — so they aren't topics. Add back anything you need.",
+    "add": "Add back"
   }
 }

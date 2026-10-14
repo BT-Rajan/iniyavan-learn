@@ -63,14 +63,16 @@ def test_word_files_keep_headings_lists_and_tables():
 
 def test_normalise_repairs_any_outline():
     out = normalise({"units": [{"title": "B", "topics": [{"title": "late", "start": 4}]}, {"title": "A", "topics": [{"title": "early", "from": 2}, "junk"]}]}, 6)
-    assert [(u["title"], [(t["title"], t["start"], t["end"]) for t in u["topics"]]) for u in out["units"]] == [("A", [("early", 1, 3)]), ("B", [("late", 4, 6)])]
+    assert [(u["title"], [(t["title"], t["start"], t["end"]) for t in u["topics"]]) for u in out["units"]] == [("A", [("early", 2, 3)]), ("B", [("late", 4, 6)])]
     assert normalise({"units": [{"topics": [{"start": "x"}]}]}, 3) is None
+    gaps = normalise({"units": [{"title": "U", "topics": [{"title": "a", "start": 3, "end": 4}, {"title": "b", "start": 6, "end": 99}, {"title": "c", "start": 8, "end": 9}]}]}, 10)
+    assert [(t["start"], t["end"]) for t in gaps["units"][0]["topics"]] == [(3, 4), (6, 7), (8, 9)]  # gaps stay out; a bad end runs to the next topic
 
 
 def test_headings_slice_without_ai():
     out = by_headings(["# Water", "## Hard", "text", "## Soft", "text", "# Air", "text"])
     assert [(u["title"], [(t["title"], t["start"], t["end"]) for t in u["topics"]]) for u in out["units"]] == [
-        ("Water", [("Water", 1, 1), ("Hard", 2, 3), ("Soft", 4, 5)]), ("Air", [("Air", 6, 7)])]
+        ("Water", [("Hard", 1, 3), ("Soft", 4, 5)]), ("Air", [("Air", 6, 7)])]  # a chapter title joins its first section
     plain = by_headings(["word " * 200, "word " * 200, "word " * 10])
     assert [(t["start"], t["end"]) for t in plain["units"][0]["topics"]] == [(1, 2), (3, 3)]
 
@@ -122,3 +124,55 @@ def test_staff_imports_arrive_as_drafts(admin):
     shown = Api().login("stu@x.com").get(f"/api/courses/{c['id']}").json()
     assert shown["units"] == [] or all(not u["topics"] for u in shown["units"])
     assert all(not t["published"] for u in admin.get(f"/api/courses/{c['id']}").json()["units"] for t in u["topics"])
+
+
+def test_a_book_pdf_keeps_its_formatting_and_only_the_lessons_become_topics():
+    from app.modules.studio.service import left_out, non_learning
+    from tests.book_pdf import make_book
+    paras = extract.pdf(make_book())
+    text = "\n\n".join(paras)
+    assert "### Hard and soft water" in paras and "**parts per million**" in text
+    assert "- Temporary hardness goes away when water is boiled.\n- Permanent hardness needs washing soda or ion exchange." in paras
+    assert "| Kind | Cause | Removed by |\n|---|---|---|\n| Temporary | Bicarbonates | Boiling |" in text
+    assert not any(p.startswith("Science for Grade 8 ") or p.strip().isdigit() for p in paras)  # running header and page numbers are gone
+    skip = non_learning(paras)
+    skipped = " ".join(paras[k - 1] for k in sorted(skip))
+    for word in ("ISBN", "All rights reserved", "Contents", "Preface", "Index", "boiling, 5, 6"):
+        assert word in skipped
+    assert not any(k in skip for k, p in enumerate(paras, 1) if "Water is called hard" in p or "mixture of gases" in p)
+    outline = by_headings(paras)
+    titles = [(u["title"], [t["title"] for t in u["topics"]]) for u in outline["units"]]
+    assert titles == [("Chapter 1 Water", ["Hard and soft water", "Kinds of hardness"]), ("Chapter 2 Air", ["What air is made of"])]
+
+    class M:  # what the author sees as left out
+        pass
+    m = M()
+    m.paragraphs, m.outline = paras, outline
+    firsts = [x["first"] for x in left_out(m)]
+    assert firsts[0] == "Science for Grade 8" and any(f == "Index" for f in firsts)
+
+
+def test_ai_slicing_leaves_out_what_the_ai_and_the_rules_skip(student, monkeypatch):
+    from tests.book_pdf import make_book
+    paras = extract.pdf(make_book())
+    seen = {}
+
+    async def fake(key, model, system, user_msg, max_tokens, timeout=90):
+        seen["system"], seen["msg"] = system, user_msg
+        n = {p: k for k, p in enumerate(paras, 1)}
+        water, kinds, air = n["### Hard and soft water"], n["### Kinds of hardness"], n["### What air is made of"]
+        reply = {"units": [{"title": "Front", "topics": [{"title": "Copyright", "start": 2, "end": 5}]},  # the rules catch what the AI let through
+                           {"title": "Water", "topics": [{"title": "Hard water", "start": water, "end": kinds - 1}, {"title": "Kinds", "start": kinds, "end": kinds + 2}]},
+                           {"title": "Air", "topics": [{"title": "Air", "start": air, "end": air + 1}]}]}
+        return json.dumps(reply), 10
+    monkeypatch.setattr("app.modules.ai.service.complete", fake)
+    cid = student.post("/api/studio", json={"title": "Book"}).json()["course_id"]
+    student.post(f"/api/studio/{cid}/files?name=book.pdf", content=make_book())
+    out = student.post(f"/api/studio/{cid}/slice", json={}).json()
+    assert [u["title"] for u in out["outline"]["units"]] == ["Water", "Air"]
+    assert "Leave out everything else" in seen["system"] and "[1] " in seen["msg"]
+    assert out["left_out"] and out["left_out"][0]["start"] == 1
+    assert student.post(f"/api/studio/{cid}/apply", json={}).json()["topics"] == 3
+    topics = [t for u in student.get(f"/api/courses/{cid}").json()["units"] for t in u["topics"]]
+    first = student.get(f"/api/topics/{topics[0]['id']}").json()
+    assert first["content"].startswith("### Hard and soft water") and "ISBN" not in first["content"]

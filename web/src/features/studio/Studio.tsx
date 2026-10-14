@@ -63,6 +63,44 @@ function mergeUnitUp(units: Units, ui: number): Units {
   return out;
 }
 
+function addBack(units: Units, start: number, end: number, title: string): Units {
+  const out = structuredClone(units);
+  let at: [number, number] = [0, 0];
+  out.forEach((u, a) => u.topics.forEach((t, b) => { if (t.end < start) at = [a, b + 1]; }));
+  if (!out.length) return [{ title: "", topics: [{ title, summary: "", start, end }] }];
+  out[at[0]].topics.splice(at[1], 0, { title, summary: "", start, end });
+  return out;
+}
+
+/** What the split left out (cover, contents, index…), so nothing disappears without the author seeing it. */
+function LeftOut({ s, units, setUnits }: { s: StudioState; units: Units; setUnits: (u: Units) => void }) {
+  const { t } = useTranslation("studio");
+  const covered = new Set(units.flatMap((u) => u.topics.flatMap((x) => Array.from({ length: x.end - x.start + 1 }, (_, i) => x.start + i))));
+  const items = (s.left_out ?? []).filter((x) => !covered.has(x.start));
+  if (!items.length) return null;
+  const paras = items.reduce((n, x) => n + x.end - x.start + 1, 0);
+  return (
+    <details className="disclosure card">
+      <summary>{t("leftOut.title", { n: paras })}</summary>
+      <div className="stack tight" style={{ marginBlockStart: 10 }}>
+        <p className="small muted">{t("leftOut.hint")}</p>
+        {items.map((x) => (
+          <div key={x.start} className="row nowrap" style={{ alignItems: "flex-start", borderBlockStart: "1px solid var(--line)", paddingBlockStart: 8 }}>
+            <div className="grow stack" style={{ gap: 2 }}>
+              <strong className="small clip">{x.first}</strong>
+              <span className="tiny faint" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{x.excerpt}</span>
+              <span className="tiny muted">{t("outline.paras", { n: x.end - x.start + 1 })}</span>
+            </div>
+            <Button size="small" icon="plus" onClick={() => setUnits(addBack(units, x.start, x.end, x.first.slice(0, 80) || t("outline.newTopic")))}>
+              {t("leftOut.add")}
+            </Button>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
+
 // ---------- material ----------
 interface Upload { name: string; state: "busy" | "done" | "error"; paragraphs?: number; error?: unknown }
 
@@ -385,6 +423,7 @@ export default function Studio() {
             </div>
             <p className="small muted">{t("outline.hint")}</p>
             <OutlineEditor s={s} units={units} setUnits={setUnits} />
+            <LeftOut s={s} units={units} setUnits={setUnits} />
           </section>
         )}
 
