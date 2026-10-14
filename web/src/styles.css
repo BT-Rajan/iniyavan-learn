@@ -427,3 +427,4 @@ details.disclosure[open] > summary::before { transform: rotate(90deg); }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 .card.link.stack { display: flex; }
+@media (hover: none) { .searchbox kbd { display: none; } }

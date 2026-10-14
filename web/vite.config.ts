@@ -5,6 +5,6 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [react()],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
-  server: { port: 5173, proxy: { "/api": "http://127.0.0.1:8000" } },
+  server: { port: 5173, proxy: { "/api": process.env.API_URL ?? "http://127.0.0.1:8000" } },
   test: { environment: "node", include: ["src/**/*.test.ts"] },
 });

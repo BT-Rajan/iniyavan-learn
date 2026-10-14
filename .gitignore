@@ -9,3 +9,5 @@ node_modules/
 web/dist/
 *.log
 *.tsbuildinfo
+test-results/
+playwright-report/
