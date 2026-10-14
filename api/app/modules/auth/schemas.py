@@ -26,6 +26,7 @@ class RegisterIn(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
     password: str = Field(min_length=8, max_length=200)
+    locale: str = Field(default="en", max_length=10)
 
 
 class VerifyIn(BaseModel):

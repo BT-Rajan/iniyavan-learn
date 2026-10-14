@@ -56,8 +56,9 @@ def create_app() -> FastAPI:
         def spa(path: str):  # every non-API path is the web app (client-side routes)
             if path.startswith("api/"):
                 return JSONResponse({"error": {"code": "http.not_found", "params": {}}}, status_code=404)
-            target = dist / path
-            return FileResponse(target if path and target.is_file() else dist / "index.html")
+            target = (dist / path).resolve()
+            inside = target.is_relative_to(dist.resolve())  # never serve anything outside the build
+            return FileResponse(target if path and inside and target.is_file() else dist / "index.html")
     return app
 
 

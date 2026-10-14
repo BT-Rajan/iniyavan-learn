@@ -11,6 +11,7 @@ const files = import.meta.glob("./locales/*/*.json", { eager: true, import: "def
 
 export const LANGUAGES: Record<string, { name: string; dir: "ltr" | "rtl" }> = {
   en: { name: "English", dir: "ltr" },
+  ar: { name: "العربية", dir: "rtl" },
 };
 
 const resources: Record<string, Record<string, Record<string, unknown>>> = {};
@@ -31,6 +32,15 @@ function stored(): string {
 function pick(): string {
   const wanted = [stored(), ...navigator.languages].map((l) => l.split("-")[0]);
   return wanted.find((l) => l in LANGUAGES) ?? "en";
+}
+
+/** Remembered when someone picks a language before signing in, so their account can take it. */
+export function pickedBeforeSignIn(): string | null {
+  try { return sessionStorage.getItem("lang-picked"); } catch { return null; }
+}
+export function choose(lang: string) {
+  try { sessionStorage.setItem("lang-picked", lang); } catch { /* ignore */ }
+  return applyLanguage(lang);
 }
 
 export function applyLanguage(lang: string) {

@@ -13,7 +13,7 @@ import { PasswordInput } from "./PasswordInput";
 
 /** Two steps on one screen: details, then the 6-digit code we emailed. */
 export default function Register() {
-  const { t } = useTranslation("auth");
+  const { t, i18n } = useTranslation("auth");
   const { config, signedIn } = useSession();
   const nav = useNavigate();
   const [name, setName] = useState("");
@@ -22,7 +22,7 @@ export default function Register() {
   const [code, setCode] = useState("");
   const [sent, setSent] = useState(false);
   const fe = useFieldError();
-  const start = useAction(() => api.post("/api/auth/register", { name: name.trim(), email: email.trim(), password }), { onDone: () => setSent(true) });
+  const start = useAction(() => api.post("/api/auth/register", { name: name.trim(), email: email.trim(), password, locale: i18n.language }), { onDone: () => setSent(true) });
   const verify = useAction(() => api.post<Me>("/api/auth/register/verify", { email: email.trim(), code: code.trim() }), {
     onDone: (me) => { signedIn(me); nav("/", { replace: true }); },
   });

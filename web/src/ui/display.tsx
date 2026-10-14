@@ -142,9 +142,10 @@ export function Avatar({ name }: { name: string }) {
 
 /** Topic content: Markdown (no raw HTML), or HTML the server has already cleaned. */
 export function Content({ text, format = "markdown" }: { text: string; format?: "markdown" | "html" }) {
-  if (format === "html") return <div className="prose" dangerouslySetInnerHTML={{ __html: text }} />;
+  // dir="auto": a topic written in Arabic reads right-to-left even in the English interface, and the reverse.
+  if (format === "html") return <div className="prose" dir="auto" dangerouslySetInnerHTML={{ __html: text }} />;
   return (
-    <div className="prose">
+    <div className="prose" dir="auto">
       <Markdown remarkPlugins={[remarkGfm]} components={{ a: ({ href, children }) => <a href={href} target="_blank" rel="noreferrer noopener">{children}</a> }}>
         {text}
       </Markdown>

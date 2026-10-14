@@ -30,6 +30,7 @@ class PendingRegistration(Base):
     email: Mapped[str] = mapped_column(String(190), unique=True)
     name: Mapped[str] = mapped_column(String(120))
     password_hash: Mapped[str] = mapped_column(String(255))
+    locale: Mapped[str] = mapped_column(String(10), default="en", server_default="en")
     code_hash: Mapped[str] = mapped_column(String(64))
     tries: Mapped[int] = mapped_column(Integer, default=0)
     sends: Mapped[int] = mapped_column(Integer, default=1)

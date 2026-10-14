@@ -57,7 +57,7 @@ def test_password_reset_by_email(anon, monkeypatch):
     mail.outbox.clear()
     assert anon.post("/api/auth/forgot", json={"email": "s@x.com"}).status_code == 204
     assert anon.post("/api/auth/forgot", json={"email": "nobody@x.com"}).status_code == 204  # same answer
-    token = mail.outbox[-1].split("#")[1].strip()
+    token = mail.outbox[-1].split("#")[1].split()[0]
     assert anon.post("/api/auth/reset", json={"token": token, "password": "another-1"}).status_code == 200
     assert code_of(anon.post("/api/auth/reset", json={"token": token, "password": "another-2"})) == "auth.reset_invalid"  # single use
     Api().login("s@x.com", "another-1")
@@ -125,3 +125,21 @@ def test_import_without_roles_keeps_staff_roles(admin):
     assert (r["created"], r["updated"]) == (1, 1)
     users = {u["email"]: u["role"] for u in admin.get("/api/users").json()["items"]}
     assert users["prof@x.com"] == "faculty" and users["new@x.com"] == "student"
+
+
+def test_arabic_sign_up_mails_in_arabic_and_keeps_the_language(admin, anon, monkeypatch):
+    import re
+
+    from app.core import mail
+    from app.core.config import settings
+    monkeypatch.setattr(type(settings), "mail_enabled", property(lambda self: True))
+    sent = []
+    monkeypatch.setattr(mail, "send", lambda to, subject, body: sent.append((subject, body)))
+    admin.patch("/api/admin/settings", json={"self_registration": True})
+    assert anon.post("/api/auth/register", json={"name": "ليلى", "email": "l@school.org", "password": "longenough", "locale": "ar"}).status_code == 204
+    subject, body = sent[-1]
+    assert subject == "رمز التسجيل"
+    me = anon.post("/api/auth/register/verify", json={"email": "l@school.org", "code": re.search(r"\d{6}", body).group()}).json()
+    assert me["locale"] == "ar"
+    assert anon.patch("/api/auth/me", json={"locale": "en"}).json()["locale"] == "en"
+    assert code_of(anon.patch("/api/auth/me", json={"locale": "xx"})) == "auth.locale_unknown"

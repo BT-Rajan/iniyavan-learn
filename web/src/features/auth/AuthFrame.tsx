@@ -1,6 +1,8 @@
 import type { FormEvent, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Brand } from "@/app/Shell";
+import { choose, LANGUAGES } from "@/i18n";
 import { Button } from "@/ui/controls";
 import { useErrorText } from "@/ui/errors";
 
@@ -18,6 +20,7 @@ export function AuthFrame({ title, sub, children, footer }: { title: string; sub
           {children}
         </div>
         {footer && <div className="small muted" style={{ textAlign: "center" }}>{footer}</div>}
+        <LanguageSwitch />
       </div>
     </main>
   );
@@ -35,5 +38,22 @@ export function AuthForm({ onSubmit, busy, error, submit, children }: {
         {error ? err(error) : ""}
       </p>
     </form>
+  );
+}
+
+/** Every signed-out screen offers the languages; the choice carries into the account after signing in. */
+function LanguageSwitch() {
+  const { i18n } = useTranslation();
+  const langs = Object.entries(LANGUAGES);
+  if (langs.length < 2) return null;
+  return (
+    <nav className="row" style={{ justifyContent: "center" }} aria-label="Language / اللغة">
+      {langs.map(([code, l]) => (
+        <button key={code} type="button" lang={code} className="btn ghost small" aria-pressed={i18n.language === code}
+                style={i18n.language === code ? { color: "var(--accent)" } : undefined} onClick={() => void choose(code)}>
+          {l.name}
+        </button>
+      ))}
+    </nav>
   );
 }

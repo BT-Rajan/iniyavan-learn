@@ -7,7 +7,7 @@ import secrets
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from app.core import mail
+from app.core import mail, messages
 from app.core.config import settings
 from app.core.db import utcnow
 from app.core.errors import AppError
@@ -65,7 +65,7 @@ def forgot(db: Session, email: str) -> None:
     token = secrets.token_urlsafe(32)
     db.add(PasswordReset(user_id=user.id, token_hash=digest(token), expires_at=utcnow() + dt.timedelta(hours=1)))
     db.commit()
-    mail.send(user.email, "Reset your password", f"Open this link within an hour to choose a new password:\n\n{settings.app_url}/reset#{token}\n")
+    mail.send(user.email, *messages.email(user.locale, "reset", link=f"{settings.app_url}/reset#{token}"))
 
 
 def reset(db: Session, token: str, password: str) -> tuple[User, str]:
@@ -85,7 +85,8 @@ def registration_open(db: Session) -> bool:
     return admin_settings.get(db, "self_registration") == "1" and settings.mail_enabled
 
 
-def register_start(db: Session, name: str, email: str, password: str) -> None:
+def register_start(db: Session, name: str, email: str, password: str, locale: str = "en") -> None:
+    locale = locale if locale in messages.LOCALES else "en"
     if not registration_open(db):
         raise AppError("auth.registration_closed", 403)
     email = email.lower()
@@ -99,11 +100,11 @@ def register_start(db: Session, name: str, email: str, password: str) -> None:
         raise AppError("auth.too_many_codes", 429)
     code = random_code()
     pending = pending or PendingRegistration(email=email, sends=0)
-    pending.name, pending.password_hash, pending.code_hash = name.strip(), hash_password(password), digest(code)
+    pending.name, pending.password_hash, pending.code_hash, pending.locale = name.strip(), hash_password(password), digest(code), locale
     pending.tries, pending.sends, pending.expires_at, pending.sent_at = 0, pending.sends + 1, utcnow() + dt.timedelta(minutes=CODE_MINUTES), utcnow()
     db.add(pending)
     db.commit()
-    mail.send(email, "Your sign-up code", f"Your code is {code}. It is valid for {CODE_MINUTES} minutes.\n")
+    mail.send(email, *messages.email(locale, "code", code=code, minutes=CODE_MINUTES))
 
 
 def register_verify(db: Session, email: str, code: str) -> tuple[User, str]:
@@ -115,7 +116,7 @@ def register_verify(db: Session, email: str, code: str) -> tuple[User, str]:
         db.commit()
         raise AppError("auth.code_wrong", 400, left=CODE_TRIES - pending.tries)
     user = User(email=pending.email, name=pending.name, role="student", password_hash=pending.password_hash,
-                session_key=new_session_key(), self_registered=True)
+                session_key=new_session_key(), self_registered=True, locale=pending.locale or "en")
     db.add(user)
     db.delete(pending)
     db.commit()

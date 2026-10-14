@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { api } from "@/api/client";
 import type { Me } from "@/api/types";
@@ -13,12 +13,13 @@ import { PasswordInput } from "./PasswordInput";
 
 export default function Reset() {
   const { t } = useTranslation("auth");
-  const [params] = useSearchParams();
+  // The emailed link carries the token after "#", so it never reaches server logs.
+  const [token] = useState(() => new URLSearchParams(window.location.search).get("token") ?? window.location.hash.slice(1));
   const { signedIn } = useSession();
   const nav = useNavigate();
   const [password, setPassword] = useState("");
   const fe = useFieldError();
-  const reset = useAction(() => api.post<Me>("/api/auth/reset", { token: params.get("token") ?? "", password }), {
+  const reset = useAction(() => api.post<Me>("/api/auth/reset", { token, password }), {
     onDone: (me) => { signedIn(me); nav("/", { replace: true }); },
   });
   return (

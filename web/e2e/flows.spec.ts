@@ -62,3 +62,17 @@ test("a student turns pasted notes into a course", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "My biology notes" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Tissues/ })).toBeVisible();
 });
+
+test("Arabic switches the whole interface to right-to-left and the account keeps it", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: "العربية" }).click();
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+  await page.getByLabel("البريد الإلكتروني").fill("teacher@demo.school");
+  await page.locator('input[type="password"]').fill("demo-pass-1");
+  await page.getByRole("button", { name: "تسجيل الدخول" }).click();
+  await expect(page.getByRole("link", { name: "المقررات" }).first()).toBeVisible();
+  await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await page.reload(); // the language now comes from the account
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+});

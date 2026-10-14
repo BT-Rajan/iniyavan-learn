@@ -428,3 +428,18 @@ details.disclosure[open] > summary::before { transform: rotate(90deg); }
 }
 .card.link.stack { display: flex; }
 @media (hover: none) { .searchbox kbd { display: none; } }
+
+/* ---------- right-to-left and Arabic ---------- */
+:lang(ar) body { line-height: 1.75; }
+:lang(ar) .reading { line-height: 1.95; }
+:lang(ar) h1, :lang(ar) h2, :lang(ar) h3 { letter-spacing: 0; line-height: 1.4; }
+:lang(ar) .nav .section { text-transform: none; letter-spacing: 0; font-size: 0.8rem; }
+/* What people type follows its own direction (Arabic notes in an English UI, or the reverse). */
+input[type="text"], input[type="search"], textarea { unicode-bidi: plaintext; }
+input[type="email"], input[type="password"], input[type="url"] { direction: ltr; text-align: start; }
+[dir="rtl"] input[type="email"], [dir="rtl"] input[type="password"] { text-align: end; }
+.hero .bar { background: rgb(255 255 255 / 22%); } .hero .bar > span { background: var(--accent-ink); }
+/* Headings, titles, choices and edit-in-place text are mostly what people wrote: each takes its direction from its own
+   first letter, so "Which salts make water hard?" keeps its question mark at the end inside the Arabic interface. */
+h1, h2, h3, .title, .editable, .clip, .choice .grow, .card.link p, .topic-row .small, .notice .grow > span { unicode-bidi: plaintext; }
+.nav .clip { unicode-bidi: isolate; }

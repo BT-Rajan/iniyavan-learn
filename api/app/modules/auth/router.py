@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
+from app.core import messages
 from app.core.config import settings
 from app.core.db import get_db
 from app.core.deps import COOKIE, current_user
@@ -15,7 +16,7 @@ from . import service
 from .schemas import AiKeyIn, ForgotIn, LoginIn, Me, PasswordIn, ProfileIn, RegisterIn, ResetIn, VerifyIn
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
-LOCALES = {"en"}
+LOCALES = set(messages.LOCALES)
 
 
 def _set_cookie(response: Response, token: str) -> None:
@@ -77,7 +78,7 @@ def reset(body: ResetIn, response: Response, db: Session = Depends(get_db)):
 
 @router.post("/register", status_code=204)
 def register(body: RegisterIn, db: Session = Depends(get_db)):
-    service.register_start(db, body.name, body.email, body.password)
+    service.register_start(db, body.name, body.email, body.password, body.locale)
 
 
 @router.post("/register/verify", response_model=Me)

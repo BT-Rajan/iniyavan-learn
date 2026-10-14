@@ -117,7 +117,8 @@ def test_images_are_checked_by_their_bytes(admin, anon):
     url = admin.post("/api/uploads", content=png).json()["url"]
     assert anon.get(url).status_code == 200 and anon.get(url).headers["content-type"] == "image/png"
     assert code_of(admin.post("/api/uploads", content=b"<svg onload=x>")) == "upload.not_an_image"
-    assert code_of(anon.get("/api/uploads/../../etc/passwd")) in ("upload.not_found", "http.not_found")
+    r = anon.get("/api/uploads/../../etc/passwd")
+    assert "root:" not in r.text and (r.status_code == 404 or "<!doctype html>" in r.text.lower())
 
 
 def test_deleting_a_course_removes_everything_under_it(admin):

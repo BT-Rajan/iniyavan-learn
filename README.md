@@ -12,7 +12,8 @@ A learning platform for schools and colleges, and for students on their own.
 
 The interface is built to be obvious: one clear next step on the home page, edit in place, changes that
 save themselves, and feedback right where you acted — no popups. Every word is translatable (ICU messages);
-English ships today.
+English and Arabic ship today — Arabic mirrors the whole interface right-to-left, and each person picks their language
+(on the sign-in page or in their profile).
 
 ## Run it
 
@@ -54,5 +55,5 @@ Read [ARCHITECTURE.md](ARCHITECTURE.md) for the layout and the rules the code fo
 
 Copy `web/src/i18n/locales/en` to `web/src/i18n/locales/<code>`, translate the values (keep the ICU
 `{placeholders}`), add the language to `LANGUAGES` in `web/src/i18n/index.ts` (with `dir: "rtl"` for
-right-to-left scripts) and to `LOCALES` in `api/app/modules/auth/router.py`. `npm run i18n:check` reports
+right-to-left scripts) and to `LOCALES` in `api/app/core/messages.py` (with its email texts). `npm run i18n:check` reports
 missing or broken messages.

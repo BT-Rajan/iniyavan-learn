@@ -50,12 +50,15 @@ const PATHS: Record<string, string> = {
 
 export type IconName = keyof typeof PATHS;
 
+/** Icons that point along the reading direction; they mirror in right-to-left languages. */
+const DIRECTIONAL = new Set<string>(["chevronRight", "chevronLeft", "logout", "undo", "merge"]);
+
 export function Icon({ name, label, className = "", ...rest }: { name: IconName; label?: string } & SVGProps<SVGSVGElement>) {
   const fill = name === "star" || name === "play";
   return (
     <svg
       viewBox="0 0 24 24"
-      className={`icon ${className}`}
+      className={`icon ${DIRECTIONAL.has(name) ? "flip" : ""} ${className}`}
       fill={fill ? "currentColor" : "none"}
       stroke={fill ? "none" : "currentColor"}
       strokeWidth={1.8}

@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "@/api/client";
 import type { Me } from "@/api/types";
 import { useSession } from "@/app/session";
+import { pickedBeforeSignIn } from "@/i18n";
 import { Field, useAction } from "@/ui/controls";
 import { useFieldError } from "@/ui/errors";
 
@@ -20,7 +21,12 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const fieldError = useFieldError();
   const next = params.get("next");
-  const login = useAction(() => api.post<Me>("/api/auth/login", { email: email.trim(), password }), {
+  const login = useAction(async () => {
+    let me = await api.post<Me>("/api/auth/login", { email: email.trim(), password });
+    const picked = pickedBeforeSignIn();
+    if (picked && picked !== me.locale) me = await api.patch<Me>("/api/auth/me", { locale: picked }); // the language they just chose wins
+    return me;
+  }, {
     onDone: (me) => { signedIn(me); nav(next && next.startsWith("/") ? next : "/", { replace: true }); },
   });
   return (
