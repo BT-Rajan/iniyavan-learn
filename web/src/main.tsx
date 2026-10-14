@@ -8,7 +8,10 @@ import { RouterProvider } from "react-router-dom";
 
 import { ApiError } from "./api/client";
 import { router } from "./app/routes";
+import { getTheme, setTheme } from "./app/theme";
 import { SessionProvider } from "./app/session";
+
+setTheme(getTheme());
 
 const queryClient = new QueryClient({
   defaultOptions: {

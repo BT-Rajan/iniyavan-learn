@@ -1,0 +1,29 @@
+{
+  "title": "Your profile",
+  "name": "Your name",
+  "look": { "title": "Look and language", "theme": "Theme", "system": "Device", "light": "Light", "dark": "Dark", "language": "Language" },
+  "password": {
+    "title": "Password",
+    "hint": "Changing it signs you out on other devices.",
+    "current": "Current password",
+    "new": "New password",
+    "newHint": "At least 8 characters.",
+    "save": "Change password",
+    "saved": "Password changed."
+  },
+  "ai": {
+    "title": "AI helper",
+    "instHint": "Your institution provides the AI helper for explanations, quizzes and course building.",
+    "ownHint": "Use your own key from any OpenAI-compatible provider. It is stored encrypted and only used for your requests.",
+    "on": "The AI helper is on.",
+    "off": "The AI helper isn't set up here yet.",
+    "left": "{n} of {limit} AI requests left today.",
+    "keySet": "Your key is saved.",
+    "noKey": "No key yet — AI features are off until you add one.",
+    "key": "AI key",
+    "keyPlaceholder": "Paste your API key",
+    "saveKey": "Save key",
+    "replaceKey": "Replace key",
+    "removeKey": "Remove key"
+  }
+}

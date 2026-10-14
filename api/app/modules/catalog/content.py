@@ -37,6 +37,7 @@ def to_text(content: str, fmt: str) -> str:
         content = html.unescape(re.sub(r"<[^>]+>", " ", content))
     else:
         content = re.sub(r"!\[[^\]]*\]\([^)]*\)", " ", content or "")
+        content = re.sub(r"^\s*\|?(\s*:?-+:?\s*\|?)+\s*$", "", content, flags=re.M)  # table rule rows
         content = re.sub(r"[#*_`>|~]|\$+", " ", content)
     return re.sub(r"[ \t]+", " ", re.sub(r"\n\s*\n+", "\n", content)).strip()
 

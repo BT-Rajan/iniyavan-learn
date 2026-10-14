@@ -1,0 +1,14 @@
+{
+  "title": "Results for “{q}”",
+  "count": "{n, plural, =0 {No topics found} one {# topic} other {# topics}}",
+  "empty": "Search your courses",
+  "emptyHint": "Type in the search box at the top — press / to jump there from anywhere.",
+  "none": "None of your topics mention “{q}”.",
+  "ai": {
+    "notEnough": "Not what you need?",
+    "nothing": "Want an explanation anyway?",
+    "ask": "Ask the AI helper",
+    "title": "About “{q}”",
+    "disclaimer": "Written by AI, not from your course. Check it with your teacher or notes."
+  }
+}
