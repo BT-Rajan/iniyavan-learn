@@ -59,7 +59,7 @@ def prompt(db: Session, kind: str) -> str:
 
 
 def institution_key(db: Session) -> str:
-    return cfg.get(db, "ai_key") or os.getenv("AI_API_KEY", "")
+    return cfg.get(db, "ai_key") or os.getenv("AI_API_KEY") or os.getenv("DEEPSEEK_API_KEY", "")  # the older name still works
 
 
 def key_for(db: Session, user: User) -> tuple[str, bool]:

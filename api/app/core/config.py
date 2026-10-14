@@ -40,6 +40,7 @@ class Settings:
     smtp_user: str = os.getenv("SMTP_USER", "")
     smtp_password: str = os.getenv("SMTP_PASSWORD", "")
     smtp_from: str = os.getenv("SMTP_FROM", "")
+    smtp_tls: str = (os.getenv("SMTP_TLS") or "starttls").lower()  # starttls (port 587), ssl (port 465) or none
     ai_base_url: str = os.getenv("AI_BASE_URL", "https://api.deepseek.com")
     ai_model: str = os.getenv("AI_MODEL", "deepseek-chat")
     ai_daily_limit: int = _int("AI_DAILY_LIMIT", 40)

@@ -2,7 +2,7 @@ import os
 import tempfile
 
 _tmp = tempfile.mkdtemp()
-os.environ.update(SECRET_KEY="t" * 40, DATABASE_URL=f"sqlite:///{_tmp}/test.db", UPLOAD_DIR=f"{_tmp}/uploads", PASSWORD_ROUNDS="16")
+os.environ.update(SECRET_KEY="t" * 40, DATABASE_URL=os.getenv("TEST_DATABASE_URL") or f"sqlite:///{_tmp}/test.db", UPLOAD_DIR=f"{_tmp}/uploads", PASSWORD_ROUNDS="16")
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

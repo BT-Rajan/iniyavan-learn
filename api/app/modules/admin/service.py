@@ -1,6 +1,8 @@
 """Institution settings and the audit log."""
 from __future__ import annotations
 
+import os
+
 from sqlalchemy.orm import Session
 
 from app.core.security import seal, unseal
@@ -8,7 +10,7 @@ from app.core.security import seal, unseal
 from .models import AuditEntry, Setting
 
 DEFAULTS = {
-    "app_name": "Iniyavan Learn",
+    "app_name": os.getenv("APP_NAME") or "Iniyavan Learn",  # until an admin renames it in Settings
     "logo": "",
     "self_registration": "0",
     "allowed_domains": "",
