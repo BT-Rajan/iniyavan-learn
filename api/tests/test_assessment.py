@@ -204,3 +204,19 @@ def test_editing_questions_keeps_past_attempts_linked(admin):
     assert mine["latest_attempt"] == a["attempt_id"]
     assert code_of(fac.patch(f"/api/tests/{q['id']}", json={"unit_id": 9999})) == "unit.not_found"
     assert fac.patch(f"/api/tests/{q['id']}", json={"unit_id": u["id"]}).status_code == 200
+
+
+def test_ai_answers_are_asked_to_be_short_and_simple(admin, monkeypatch):
+    c, u, t1, t2, fac, stu, stu2 = school(admin)
+    systems = []
+
+    async def fake(key, model, system, user_msg, max_tokens, timeout=90):
+        systems.append(system)
+        return "Short answer.", 5
+    monkeypatch.setattr("app.modules.ai.service.complete", fake)
+    with SessionLocal() as s:
+        cfg.put(s, "ai_key", "sk-institution")
+        s.commit()
+    stu.get(f"/api/topics/{t1}/explain")
+    stu.get("/api/search/answer?q=osmosis")
+    assert len(systems) == 2 and all("15-year-old" in x and "short, crisp sentences" in x for x in systems)

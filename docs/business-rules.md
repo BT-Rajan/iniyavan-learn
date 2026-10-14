@@ -114,6 +114,8 @@ refer to these by their number (for example `R-PROG-3`).
   is left is shown when it runs low.
 - **R-AI-4** Admins can edit the prompts.
 - **R-AI-5** Provider errors never reach students in detail.
+- **R-AI-6** Everything the AI writes for students sounds like a good teacher talking to a 15-year-old:
+  short, crisp sentences and simple words; subject terms are kept and explained plainly.
 
 ## Reports
 
